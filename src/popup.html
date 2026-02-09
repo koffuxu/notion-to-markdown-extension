@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <style>
+    body { width: 350px; padding: 15px; font-family: sans-serif; }
+    h2 { margin-top: 0; font-size: 18px; }
+    .group { margin-bottom: 15px; border: 1px solid #eee; padding: 10px; border-radius: 5px; }
+    label { display: block; margin-bottom: 5px; font-size: 12px; font-weight: bold; }
+    input { width: 100%; box-sizing: border-box; margin-bottom: 10px; padding: 5px; }
+    button { width: 100%; padding: 10px; background: #333; color: #fff; border: none; cursor: pointer; border-radius: 4px; }
+    button:hover { background: #555; }
+    button:disabled { background: #ccc; }
+    #status { margin-top: 10px; font-size: 12px; word-break: break-all; }
+    .hidden { display: none; }
+    .settings-toggle { font-size: 11px; text-decoration: underline; cursor: pointer; color: blue; border: none; background: none; padding: 0; width: auto; }
+  </style>
+</head>
+<body>
+  <h2>Notion -> Markdown</h2>
+
+  <div id="setup-view">
+    <div class="group">
+      <label>Notion Integration Token (Secret)</label>
+      <input type="password" id="notion-token" placeholder="secret_...">
+    </div>
+
+    <div class="group">
+      <label>Tencent COS Settings</label>
+      <input type="text" id="cos-bucket" placeholder="Bucket (e.g., mybucket-1250000000)">
+      <input type="text" id="cos-region" placeholder="Region (e.g., ap-shanghai)">
+      <input type="password" id="cos-secret-id" placeholder="SecretId">
+      <input type="password" id="cos-secret-key" placeholder="SecretKey">
+      <input type="text" id="cos-path" placeholder="Path (e.g., blog/images/)">
+    </div>
+
+    <button id="save-settings">Save Settings</button>
+  </div>
+
+  <div id="main-view" class="hidden">
+    <p>Convert current Notion page to Markdown and copy to clipboard.</p>
+    <button id="convert-btn">Convert & Copy</button>
+    <br><br>
+    <button id="toggle-settings" class="settings-toggle">Edit Settings</button>
+  </div>
+
+  <div id="status"></div>
+
+  <script src="popup.js"></script>
+</body>
+</html>
