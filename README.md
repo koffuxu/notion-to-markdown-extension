@@ -1,6 +1,8 @@
 # Notion to Markdown Chrome Extension
 
-一键将 Notion 页面转换为 Markdown 格式，并自动上传图片到腾讯云 COS 对象存储。
+English | [简体中文](./README.zh-CN.md)
+
+Convert Notion pages to Markdown format with one click, and automatically upload images to Tencent Cloud COS.
 
 ## ✨ 功能特性
 
