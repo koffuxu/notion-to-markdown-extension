@@ -4,127 +4,273 @@ English | [简体中文](./README.zh-CN.md)
 
 Convert Notion pages to Markdown format with one click, and automatically upload images to Tencent Cloud COS.
 
-## ✨ 功能特性
+## ✨ Features
 
-- 🚀 **一键转换**: 在任何 Notion 页面点击插件图标即可转换为 Markdown
-- 📸 **图片处理**: 自动下载 Notion 临时图片并上传到腾讯云 COS，生成永久链接
-- 📋 **剪贴板集成**: 转换完成后自动复制到剪贴板，可直接粘贴使用
-- ⚙️ **配置简单**: 一次配置，永久使用
+- 🚀 **One-Click Conversion**: Convert any Notion page to Markdown by clicking the extension icon
+- 📸 **Image Processing**: Automatically download temporary Notion images and upload to Tencent Cloud COS with permanent URLs
+- 📋 **Clipboard Integration**: Converted Markdown is automatically copied to clipboard for immediate use
+- ⚙️ **Simple Configuration**: Configure once, use forever
+- 🔒 **Data Security**: All configurations stored locally, no third-party servers involved
 
-## 🛠️ 技术栈
+## 🛠️ Tech Stack
 
-- **Notion API**: `@notionhq/client` - 官方 Notion API 客户端
-- **Markdown 转换**: `notion-to-md` - Notion 块到 Markdown 的转换
-- **云存储**: `cos-js-sdk-v5` - 腾讯云对象存储 SDK
-- **构建工具**: Webpack 5
+- **Notion API**: `@notionhq/client` - Official Notion JavaScript SDK
+- **Markdown Conversion**: `notion-to-md` - Convert Notion blocks to Markdown
+- **Cloud Storage**: `cos-js-sdk-v5` - Tencent Cloud Object Storage SDK
+- **Build Tool**: Webpack 5
 
-## 📦 安装步骤
+## 📦 Installation
 
-### 1. 构建扩展
+### Method 1: Build from Source (Recommended)
 
 ```bash
-# 安装依赖
+# Clone the repository
+git clone https://github.com/koffuxu/notion-to-markdown-extension.git
+cd notion-to-markdown-extension
+
+# Install dependencies
 npm install
 
-# 构建项目
+# Build the project
 npm run build
 ```
 
-构建完成后会在 `dist/` 目录生成可安装的扩展文件。
+The built extension files will be generated in the `dist/` directory.
 
-### 2. 加载到 Chrome
+### Method 2: Download Pre-built Version
 
-1. 打开 Chrome 浏览器，访问 `chrome://extensions/`
-2. 开启右上角的 **"开发者模式"**
-3. 点击 **"加载已解压的扩展程序"**
-4. 选择项目的 `dist/` 目录
+Download the latest version from the [Releases](https://github.com/koffuxu/notion-to-markdown-extension/releases) page and extract it.
 
-## ⚙️ 配置说明
+### Load into Chrome
 
-### 获取 Notion Integration Token
+1. Open Chrome browser and navigate to `chrome://extensions/`
+2. Enable **"Developer mode"** toggle in the top right corner
+3. Click **"Load unpacked"** button
+4. Select the `dist/` directory (or extracted directory)
 
-1. 访问 [Notion Integrations](https://www.notion.so/my-integrations)
-2. 点击 **"New integration"**
-3. 命名你的 Integration（如 "Markdown Exporter"）
-4. 复制生成的 **Internal Integration Secret**（以 `secret_` 开头）
+After successful installation, you'll see the extension icon in the browser toolbar.
 
-### 配置 Notion 页面权限
+## ⚙️ Configuration
 
-在你想要转换的 Notion 页面中：
-1. 点击页面右上角的 `···` 菜单
-2. 选择 **Connections** → **Connect to**
-3. 选择你刚创建的 Integration
+First-time setup requires configuring Notion API and Tencent Cloud COS. Configuration is needed only once.
 
-### 配置腾讯云 COS
+### Step 1: Get Notion Integration Token
 
-1. 登录 [腾讯云控制台](https://console.cloud.tencent.com/cos)
-2. 创建一个存储桶（Bucket）
-3. 获取以下信息：
-   - **Bucket 名称**: 格式为 `example-1250000000`
-   - **Region**: 如 `ap-guangzhou`、`ap-shanghai` 等
-   - **SecretId** 和 **SecretKey**: 在 [API 密钥管理](https://console.cloud.tencent.com/cam/capi) 获取
+1. Visit [Notion Integrations](https://www.notion.so/my-integrations)
+2. Click **"+ New integration"**
+3. Fill in the integration details:
+   - **Name**: Enter a name, e.g., "Markdown Exporter"
+   - **Associated workspace**: Select your workspace
+4. Click **Submit**
+5. Copy the generated **Internal Integration Secret** (starts with `secret_`)
 
-### 在扩展中配置
+**Important**: Keep this token secure and do not share it with others.
 
-1. 点击浏览器工具栏的扩展图标
-2. 填入上述获取的所有配置信息
-3. 点击 **Save Settings**
+### Step 2: Grant Page Access
 
-## 🚀 使用方法
+For each Notion page you want to convert:
 
-1. 打开任意 Notion 页面
-2. 点击浏览器工具栏的扩展图标
-3. 点击 **Convert & Copy** 按钮
-4. 等待转换完成（会显示进度提示）
-5. 转换完成后 Markdown 会自动复制到剪贴板
-6. 在任意编辑器中粘贴使用
+1. Click the `···` (three dots) menu in the top right of the page
+2. Select **Connections** → **Connect to**
+3. Choose the integration you just created (e.g., "Markdown Exporter")
 
-## 📝 注意事项
+**Note**: Each page needs to be authorized individually, or authorize a parent page to inherit permissions for child pages.
 
-### CORS 配置
+### Step 3: Configure Tencent Cloud COS
 
-需要在腾讯云 COS Bucket 中配置 CORS 规则：
+#### 3.1 Create a Bucket
 
-1. 进入 COS 控制台 → 选择 Bucket → 安全管理 → 跨域访问 CORS 设置
-2. 添加规则：
-   - **来源 Origin**: `chrome-extension://*` 或 `*`（测试用）
-   - **允许的方法**: `PUT`, `POST`, `GET`
-   - **允许的头部**: `*`
+1. Log in to [Tencent Cloud COS Console](https://console.cloud.tencent.com/cos)
+2. Click **Bucket List** → **Create Bucket**
+3. Fill in the information:
+   - **Name**: Custom name, e.g., `my-blog-images`
+   - **Region**: Choose the region closest to you, e.g., `Guangzhou`, `Shanghai`, etc.
+   - **Access Permissions**: Recommend **Public Read & Private Write** (easier for blog image references)
+4. Click **Create**
 
-### 权限要求
+#### 3.2 Get API Keys
 
-- Notion 页面必须已授权给你的 Integration
-- 确保 COS 配置的 SecretId/SecretKey 有上传权限
+1. Visit [API Key Management](https://console.cloud.tencent.com/cam/capi)
+2. Click **Create Key** (or use existing keys)
+3. Record the **SecretId** and **SecretKey**
 
-## 🏗️ 项目结构
+**Security Tip**: For better security, create a sub-account with only COS upload permissions instead of using main account keys.
+
+#### 3.3 Configure CORS (Important)
+
+To allow the browser extension to upload images, configure CORS rules:
+
+1. In COS Console, enter your bucket
+2. Click **Security Management** → **CORS Configuration**
+3. Click **Add Rule** and fill in:
+   - **Origin**: `chrome-extension://*` (or `*` for testing)
+   - **Allowed Methods**: Check `PUT`, `POST`, `GET`
+   - **Allow-Headers**: Enter `*`
+   - **Expose-Headers**: Enter `ETag`
+   - **Max-Age**: `600`
+4. Click **Save**
+
+### Step 4: Configure in Extension
+
+1. Click the extension icon in the browser toolbar
+2. Fill in the configuration:
+   - **Notion Integration Token**: Secret from Step 1
+   - **Bucket**: Format `bucket-name-AppID`, e.g., `my-blog-1234567890`
+   - **Region**: Region identifier, e.g., `ap-guangzhou`, `ap-shanghai`
+   - **SecretId**: ID from Step 3
+   - **SecretKey**: Key from Step 3
+   - **Path**: Image storage path (optional), e.g., `blog/images/`, leave empty to store in root
+3. Click **Save Settings**
+
+Configuration complete!
+
+## 🚀 Usage
+
+### Basic Usage
+
+1. Open any Notion page in Chrome browser
+2. Click the extension icon in the toolbar
+3. Click **Convert & Copy** button
+4. Wait for conversion to complete (progress will be shown):
+   - `Fetching page blocks...` - Retrieving page content
+   - `Processing images...` - Processing images
+   - `Uploading image...` - Uploading images to COS
+   - `Copied to clipboard! ✅` - Conversion complete
+5. Paste in any Markdown editor (`Cmd/Ctrl + V`)
+
+### Use Cases
+
+- **Blog Writing**: Write articles in Notion, convert with one click and publish to Hexo, Hugo, Jekyll, etc.
+- **Document Migration**: Export Notion documents to Markdown format
+- **Note Management**: Sync Notion notes to local Markdown files
+- **Multi-platform Publishing**: Converted Markdown can be directly published to platforms like Juejin, Zhihu, WeChat Official Accounts, etc.
+
+### Supported Notion Block Types
+
+- ✅ Headings (Heading 1/2/3)
+- ✅ Paragraph
+- ✅ Lists (Ordered, Unordered, To-do)
+- ✅ Code Block
+- ✅ Quote
+- ✅ Divider
+- ✅ Image (automatically uploaded to COS)
+- ✅ Table
+- ✅ Link
+- ✅ Text styles (Bold, Italic, Strikethrough, etc.)
+
+## 🔧 Development
+
+### Project Structure
 
 ```
-chrome-extension/
+notion-to-markdown-extension/
 ├── src/
-│   ├── manifest.json       # Chrome 扩展配置
-│   ├── popup.html          # 扩展弹窗 UI
-│   └── popup.js            # 核心逻辑（Notion API + COS 上传）
-├── dist/                   # 构建输出目录（git ignored）
-├── webpack.config.js       # Webpack 配置
-├── package.json            # 项目依赖
-└── README.md              # 本文档
+│   ├── manifest.json       # Chrome extension manifest
+│   ├── popup.html          # Extension popup UI
+│   └── popup.js            # Core logic (Notion API + COS upload)
+├── dist/                   # Build output directory (git ignored)
+├── webpack.config.js       # Webpack configuration
+├── package.json            # Project dependencies and scripts
+├── .gitignore             # Git ignore configuration
+├── README.md              # This file
+└── README.zh-CN.md        # Chinese documentation
 ```
 
-## 🐛 调试
+### Development & Debugging
 
-如果遇到问题：
+```bash
+# Install dependencies
+npm install
 
-1. 右键点击扩展图标 → **"审查弹出内容"** (Inspect)
-2. 查看 Console 选项卡中的错误日志
-3. 常见问题：
-   - `401 Unauthorized`: Notion Token 错误或页面未授权
-   - `403 Forbidden`: COS 权限配置问题
-   - `CORS error`: 需要在 COS 配置 CORS 规则
+# Development mode (auto rebuild on file changes)
+npm run watch
+
+# Production build
+npm run build
+```
+
+### Debugging Tips
+
+If you encounter issues, you can view logs:
+
+1. Right-click the extension icon
+2. Select **"Inspect popup"**
+3. Check the **Console** tab in the opened DevTools
+
+Common errors and solutions:
+
+| Error | Possible Cause | Solution |
+|-------|---------------|----------|
+| `401 Unauthorized` | Invalid Notion token or page not authorized | Check token correctness, confirm page is authorized to the integration |
+| `403 Forbidden` | COS permission issue | Verify SecretId/Key are correct, confirm upload permissions |
+| `CORS error` | CORS not configured | Configure CORS rules in COS console |
+| `Illegal invocation` | fetch context issue | Fixed in latest version, please rebuild |
+| `Could not detect Notion Page ID` | Not a Notion page | Use in a Notion page, not database list view |
+
+## 📝 Notes
+
+### Permissions
+
+The extension requires the following permissions:
+
+- `activeTab`: Get current tab URL (to extract Notion Page ID)
+- `storage`: Store configuration (Notion token, COS settings)
+- `clipboardWrite`: Write converted Markdown to clipboard
+- `host_permissions`: Access Notion API and Tencent Cloud COS API
+
+All data is stored locally and not uploaded to any third-party servers.
+
+### Image URL Notes
+
+- Original Notion image URLs are temporary (expire in ~1 hour)
+- Extension automatically uploads images to your configured COS bucket
+- Generated image URL format: `https://{bucket}.cos.{region}.myqcloud.com/{path}/{hash}.{ext}`
+- Filenames use MD5 hash to avoid duplicate uploads
+
+### Database vs Page
+
+- ✅ **Supported**: Notion Pages
+- ❌ **Not Supported**: Notion Database list views
+
+To convert a database record, click to open the record's detail page.
+
+## 🤝 Contributing
+
+Issues and Pull Requests are welcome!
+
+### How to Contribute
+
+1. Fork this repository
+2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
+
+### Development Guidelines
+
+- Code style: Follow ESLint standards
+- Commit messages: Use semantic commit messages (Conventional Commits)
+- Testing: Add test cases for important features
 
 ## 📄 License
 
-MIT
+This project is licensed under the [MIT License](./LICENSE).
 
-## 🤝 贡献
+## 🙏 Acknowledgments
 
-欢迎提交 Issue 和 Pull Request！
+This project uses the following excellent open-source projects:
+
+- [@notionhq/client](https://github.com/makenotion/notion-sdk-js) - Official Notion JavaScript SDK
+- [notion-to-md](https://github.com/souvikinator/notion-to-md) - Notion to Markdown conversion library
+- [cos-js-sdk-v5](https://github.com/tencentyun/cos-js-sdk-v5) - Tencent Cloud Object Storage JavaScript SDK
+
+## 📮 Contact
+
+- GitHub: [@koffuxu](https://github.com/koffuxu)
+- Repository: [notion-to-markdown-extension](https://github.com/koffuxu/notion-to-markdown-extension)
+
+For questions or suggestions, please submit an [Issue](https://github.com/koffuxu/notion-to-markdown-extension/issues)!
+
+---
+
+**Star** ⭐ this project to help more people discover it!
