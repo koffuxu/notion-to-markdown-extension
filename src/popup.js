@@ -80,6 +80,34 @@ const fetchNotionPage = async (pageId, token) => {
   return await response.json();
 };
 
+// Get signed URLs for images
+const getSignedFileUrls = async (urls) => {
+  const response = await window.fetch('https://www.notion.so/api/v3/getSignedFileUrls', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    credentials: 'include',
+    body: JSON.stringify({
+      urls: urls.map(url => ({
+        url: url,
+        permissionRecord: {
+          table: 'block',
+          id: url.blockId || ''
+        }
+      }))
+    })
+  });
+
+  if (!response.ok) {
+    console.error('Failed to get signed URLs');
+    return {};
+  }
+
+  const data = await response.json();
+  return data.signedUrls || {};
+};
+
 // --- Block to Markdown Converter ---
 const blockToMarkdown = (block, recordMap) => {
   if (!block || !block.value) return '';
@@ -147,9 +175,49 @@ const blockToMarkdown = (block, recordMap) => {
       return `---\n\n`;
 
     case 'image':
-      const imageUrl = format?.display_source || properties?.source?.[0]?.[0] || '';
+      // Try multiple ways to get the image URL
+      let imageUrl = '';
+
+      // Method 1: format.display_source
+      if (format?.display_source) {
+        const displaySource = format.display_source;
+
+        // If it's an attachment URL, convert to real Notion URL
+        if (displaySource.startsWith('attachment:')) {
+          // Extract the UUID from "attachment:UUID:filename"
+          const parts = displaySource.split(':');
+          if (parts.length >= 2) {
+            const uuid = parts[1];
+            const blockId = block.value.id.replace(/-/g, '');
+
+            // Construct Notion secure URL
+            // Format: https://prod-files-secure.s3.us-west-2.amazonaws.com/[workspace-id]/[uuid]/filename
+            // We need to get this from the signed URL pattern
+            imageUrl = `https://www.notion.so/image/https%3A%2F%2Fprod-files-secure.s3.us-west-2.amazonaws.com%2F${uuid}%2F${parts[2] || 'image.png'}?table=block&id=${blockId}`;
+          }
+        } else {
+          imageUrl = displaySource;
+        }
+      }
+      // Method 2: properties.source (fallback)
+      else if (properties?.source?.[0]?.[0]) {
+        const sourceUrl = properties.source[0][0];
+        if (!sourceUrl.startsWith('attachment:')) {
+          imageUrl = sourceUrl;
+        }
+      }
+
       const caption = getText(properties?.caption) || 'image';
-      return `![${caption}](${imageUrl})\n\n`;
+
+      console.log('Final image URL:', imageUrl);
+
+      // Only output image if we have a valid URL
+      if (imageUrl && !imageUrl.startsWith('attachment:')) {
+        return `![${caption}](${imageUrl})\n\n`;
+      }
+
+      console.warn('Could not extract valid image URL from block');
+      return ''; // Skip invalid image URLs
 
     case 'bookmark':
       const url = properties?.link?.[0]?.[0] || '';
@@ -168,18 +236,36 @@ const convertNotionToMarkdown = async (pageId, token) => {
     throw new Error('Invalid response from Notion API');
   }
 
-  const blocks = Object.values(recordMap.block);
+  // Get the main page block
+  const pageBlock = recordMap.block[pageId];
+  if (!pageBlock || !pageBlock.value) {
+    throw new Error('Page block not found');
+  }
 
-  // Sort blocks by their position
-  const sortedBlocks = blocks.sort((a, b) => {
-    const aIdx = a.value?.content?.indexOf(b.value?.id) ?? -1;
-    const bIdx = b.value?.content?.indexOf(a.value?.id) ?? -1;
-    return aIdx - bIdx;
-  });
+  // Get only the content blocks (direct children of the page)
+  const contentBlockIds = pageBlock.value.content || [];
+
+  // Build ordered list of blocks by traversing the content tree
+  const getBlocksInOrder = (blockIds) => {
+    const result = [];
+    for (const blockId of blockIds) {
+      const block = recordMap.block[blockId];
+      if (block && block.value) {
+        result.push(block);
+        // Recursively add child blocks
+        if (block.value.content && block.value.content.length > 0) {
+          result.push(...getBlocksInOrder(block.value.content));
+        }
+      }
+    }
+    return result;
+  };
+
+  const orderedBlocks = getBlocksInOrder(contentBlockIds);
 
   let markdown = '';
 
-  for (const block of sortedBlocks) {
+  for (const block of orderedBlocks) {
     markdown += blockToMarkdown(block, recordMap);
   }
 
