@@ -1,18 +1,20 @@
 {
   "manifest_version": 3,
   "name": "Notion to Markdown with COS",
-  "version": "1.0",
+  "version": "0.0.3",
   "description": "Convert Notion page to Markdown and upload images to Tencent Cloud COS",
   "permissions": [
     "activeTab",
     "storage",
     "scripting",
-    "clipboardWrite"
+    "clipboardWrite",
+    "cookies"
   ],
   "host_permissions": [
     "https://api.notion.com/*",
     "https://*.myqcloud.com/*",
-    "https://*.amazonaws.com/*"
+    "https://*.amazonaws.com/*",
+    "https://*.notion.so/*"
   ],
   "action": {
     "default_popup": "popup.html"

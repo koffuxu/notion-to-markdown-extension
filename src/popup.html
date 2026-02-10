@@ -3,9 +3,14 @@
 <head>
   <meta charset="UTF-8">
   <style>
-    body { width: 350px; padding: 15px; font-family: sans-serif; }
+    body { width: 380px; padding: 15px; font-family: sans-serif; }
     h2 { margin-top: 0; font-size: 18px; }
+    .version { font-size: 10px; color: #999; margin-left: 5px; }
     .group { margin-bottom: 15px; border: 1px solid #eee; padding: 10px; border-radius: 5px; }
+    .info-box { background: #e8f4f8; border-left: 4px solid #1a73e8; padding: 10px; margin-bottom: 15px; font-size: 12px; line-height: 1.5; }
+    .mode-selector { margin-bottom: 15px; }
+    .mode-selector label { display: inline-block; margin-right: 15px; cursor: pointer; font-size: 13px; }
+    .mode-selector input[type="radio"] { margin-right: 5px; }
     label { display: block; margin-bottom: 5px; font-size: 12px; font-weight: bold; }
     input { width: 100%; box-sizing: border-box; margin-bottom: 10px; padding: 5px; }
     button { width: 100%; padding: 10px; background: #333; color: #fff; border: none; cursor: pointer; border-radius: 4px; }
@@ -17,12 +22,32 @@
   </style>
 </head>
 <body>
-  <h2>Notion -> Markdown</h2>
+  <h2>Notion → Markdown <span class="version">v0.0.3</span></h2>
 
   <div id="setup-view">
-    <div class="group">
-      <label>Notion Integration Token (Secret)</label>
+    <div class="mode-selector">
+      <label>
+        <input type="radio" name="auth-mode" value="cookie" id="mode-cookie" checked>
+        🍪 Cookie Mode (Recommended)
+      </label>
+      <label>
+        <input type="radio" name="auth-mode" value="token" id="mode-token">
+        🔑 Token Mode
+      </label>
+    </div>
+
+    <div class="info-box" id="cookie-info">
+      ℹ️ <strong>Cookie Mode:</strong> No Notion setup needed! Just log in to Notion in your browser.
+    </div>
+
+    <div class="info-box hidden" id="token-info">
+      ℹ️ <strong>Token Mode:</strong> Requires Notion Integration Token and page authorization. More stable but more setup required.
+    </div>
+
+    <div class="group hidden" id="token-group">
+      <label>Notion Integration Token</label>
       <input type="password" id="notion-token" placeholder="secret_...">
+      <small style="font-size: 11px; color: #666;">Get from <a href="https://www.notion.so/my-integrations" target="_blank">Notion Integrations</a></small>
     </div>
 
     <div class="group">
@@ -39,6 +64,9 @@
 
   <div id="main-view" class="hidden">
     <p>Convert current Notion page to Markdown and copy to clipboard.</p>
+    <p style="font-size: 11px; color: #666;">
+      <strong>Mode:</strong> <span id="current-mode">Cookie</span>
+    </p>
     <button id="convert-btn">Convert & Copy</button>
     <br><br>
     <button id="toggle-settings" class="settings-toggle">Edit Settings</button>
